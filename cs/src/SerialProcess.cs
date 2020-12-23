@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 public class SerialProcess
 {
+    public SerialProcess() { }
+    public SerialProcess(bool autoFlush) { _autoFlush = autoFlush; }
+
+    private bool _autoFlush = true;
     private Queue<System.Action<System.Action>> _processes = new Queue<System.Action<System.Action>>();
 
     public SerialProcess Add(System.Action<System.Action> process)
@@ -16,6 +20,12 @@ public class SerialProcess
         Next();
     }
 
+    public SerialProcess SetAutoFlush(bool autoFlush)
+    {
+        _autoFlush = autoFlush;
+        return this;
+    }
+
     private void Next()
     {
         if (_processes.Count == 0)
@@ -24,7 +34,8 @@ public class SerialProcess
         var process = _processes.Dequeue();
         process(() =>
         {
-            Next();
+            if (_autoFlush)
+                Next();
         });
     }
 }
